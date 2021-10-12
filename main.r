@@ -3,10 +3,10 @@
 
 //@version=5
 
-activate_ema_strategy = input(title='Activate EMA STRATEGY ?', defval=true, max_bars_back=500)
+activate_ema_strategy = input(title='Activate EMA STRATEGY ?', defval=true)
 
 //EMA STRATEGY
-indicator(title='combine stragegies', shorttitle='CMB', overlay=true, format=format.inherit)
+indicator(title='combine stragegies', shorttitle='CMB', overlay=true, format=format.inherit , max_bars_back=500)
 ema20 = ta.ema(close, 20)
 ema50 = ta.ema(close, 50)
 ema100 = ta.ema(close, 100)
@@ -585,12 +585,14 @@ alertcondition(neg_reg_div_detected_DIV4 or neg_hid_div_detected_DIV4, title='Ne
 
 //AUTO SUPPORT AND RESISTANCE START
 
+activate_oto_sr_strategy = input(title='Activate Autosupport and resistance STRATEGY ?', defval=true)
 
 
-lenW_otosupp = input.int(title="Number Candle of 1 Wave", defval=17, minval=1, confirm=true)
-numsr_otosupp = input.int(title="Number of Support／Resistance", defval=10, minval=1, maxval=500, confirm=true)
-supcol_otosupp = input.color(color.new(color.green, 70), title="Support", confirm=true)
-rescol_otosupp = input.color(color.new(color.red, 70), title="Resistance", confirm=true)
+
+lenW_otosupp = input.int(title="Number Candle of 1 Wave", defval=25, minval=1, confirm=true)
+numsr_otosupp = input.int(title="Number of Support／Resistance", defval=5, minval=1, maxval=500, confirm=true)
+supcol_otosupp = input.color(color.new(color.green, 85), title="Support", confirm=true)
+rescol_otosupp = input.color(color.new(color.red, 85), title="Resistance", confirm=true)
 breakoutmode_otosupp = input.bool(true, title="Breakout Mode", confirm=true)
 var box[] boxes_otosupp = array.new_box()
 
@@ -618,35 +620,40 @@ srfun(src, len, isHigh_otosupp) =>
         [id]
     else
         [box(na)]
-[resbox_otosupp] = srfun(high, lenW_otosupp-1, true)
-[supbox_otosupp] = srfun(low, lenW_otosupp-1, false)
+
+if activate_oto_sr_strategy        
+    [resbox_otosupp] = srfun(high, lenW_otosupp-1, true)
+    [supbox_otosupp] = srfun(low, lenW_otosupp-1, false)
 
 
-if not na(resbox_otosupp)
-    array.push(boxes_otosupp, resbox_otosupp)
-if not na(supbox_otosupp)
-    array.push(boxes_otosupp, supbox_otosupp)
+    if not na(resbox_otosupp)
+        array.push(boxes_otosupp, resbox_otosupp)
+    if not na(supbox_otosupp)
+        array.push(boxes_otosupp, supbox_otosupp)
 
-if array.size(boxes_otosupp) > numsr_otosupp
-    boxdl_supp = array.shift(boxes_otosupp)
-    box.delete(boxdl_supp)
+    if array.size(boxes_otosupp) > numsr_otosupp
+        boxdl_supp = array.shift(boxes_otosupp)
+        box.delete(boxdl_supp)
 
-if array.size(boxes_otosupp) != 0
-    for i = array.size(boxes_otosupp)-1 to 0
-        box = array.get(boxes_otosupp, i)
-        y1 = box.get_top(box)
-        y2 = box.get_bottom(box)
-        box.set_right(box, bar_index)
-        if close < math.min(y1, y2) and barstate.isconfirmed and breakoutmode_otosupp
-            box.set_border_color(box, rescol_otosupp)
-            box.set_bgcolor(box, rescol_otosupp)
-        if close > math.max(y1, y2) and barstate.isconfirmed and breakoutmode_otosupp
-            box.set_border_color(box, supcol_otosupp)
-            box.set_bgcolor(box, supcol_otosupp)
+    if array.size(boxes_otosupp) != 0
+        for i = array.size(boxes_otosupp)-1 to 0
+            box = array.get(boxes_otosupp, i)
+            y1 = box.get_top(box)
+            y2 = box.get_bottom(box)
+            box.set_right(box, bar_index)
+            if close < math.min(y1, y2) and barstate.isconfirmed and breakoutmode_otosupp
+                box.set_border_color(box, rescol_otosupp)
+                box.set_bgcolor(box, rescol_otosupp)
+            if close > math.max(y1, y2) and barstate.isconfirmed and breakoutmode_otosupp
+                box.set_border_color(box, supcol_otosupp)
+                box.set_bgcolor(box, supcol_otosupp)
 
 
 
 watermarki_supp = input.bool(true, "Watermark", group="Author Sign", confirm=true)
+
+
+
 
 string  i_tableYpos_oto_supp = input.string("top", "Position", inline = "12", options = ["top", "middle", "bottom"])
 string  i_tableXpos_oto_supp = input.string("center", "", inline = "12", options = ["left", "center", "right"])
@@ -666,11 +673,3 @@ if barstate.islast and watermarki_supp
 
 //END OF AUTO SUPPORT AND RESISTANCE 
 //*******************************************************
-
-
-
-
-
-
-
-
