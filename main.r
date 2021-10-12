@@ -3,7 +3,7 @@
 
 //@version=5
 
-activate_ema_strategy = input(title='Activate EMA STRATEGY ?', defval=true)
+activate_ema_strategy = input(title='Activate EMA STRATEGY ?', defval=true, max_bars_back=500)
 
 //EMA STRATEGY
 indicator(title='combine stragegies', shorttitle='CMB', overlay=true, format=format.inherit)
