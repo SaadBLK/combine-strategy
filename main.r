@@ -581,6 +581,94 @@ alertcondition(neg_reg_div_detected_DIV4 or neg_hid_div_detected_DIV4, title='Ne
 
 
 
+//******************************************************
+
+//AUTO SUPPORT AND RESISTANCE START
+
+
+
+lenW_otosupp = input.int(title="Number Candle of 1 Wave", defval=17, minval=1, confirm=true)
+numsr_otosupp = input.int(title="Number of Support／Resistance", defval=10, minval=1, maxval=500, confirm=true)
+supcol_otosupp = input.color(color.new(color.green, 70), title="Support", confirm=true)
+rescol_otosupp = input.color(color.new(color.red, 70), title="Resistance", confirm=true)
+breakoutmode_otosupp = input.bool(true, title="Breakout Mode", confirm=true)
+var box[] boxes_otosupp = array.new_box()
+
+srfun(src, len, isHigh_otosupp) =>
+    p = nz(src[len])
+    float q = na
+    if isHigh_otosupp
+        q := math.max(open[len], close[len])
+    if not isHigh_otosupp
+        q := math.min(open[len], close[len])
+    colorbox = isHigh_otosupp ? rescol_otosupp : supcol_otosupp
+    isFound = true
+    for i = 0 to len - 1
+        if isHigh_otosupp and src[i] > p
+            isFound := false
+        if not isHigh_otosupp and src[i] < p
+            isFound := false
+    for i = len + 1 to 2 * len
+        if isHigh_otosupp and src[i] >= p
+            isFound := false
+        if not isHigh_otosupp and src[i] <= p
+            isFound := false
+    if isFound
+        id = box.new(bar_index[len], p, bar_index, q, border_color = colorbox, bgcolor = colorbox)
+        [id]
+    else
+        [box(na)]
+[resbox_otosupp] = srfun(high, lenW_otosupp-1, true)
+[supbox_otosupp] = srfun(low, lenW_otosupp-1, false)
+
+
+if not na(resbox_otosupp)
+    array.push(boxes_otosupp, resbox_otosupp)
+if not na(supbox_otosupp)
+    array.push(boxes_otosupp, supbox_otosupp)
+
+if array.size(boxes_otosupp) > numsr_otosupp
+    boxdl_supp = array.shift(boxes_otosupp)
+    box.delete(boxdl_supp)
+
+if array.size(boxes_otosupp) != 0
+    for i = array.size(boxes_otosupp)-1 to 0
+        box = array.get(boxes_otosupp, i)
+        y1 = box.get_top(box)
+        y2 = box.get_bottom(box)
+        box.set_right(box, bar_index)
+        if close < math.min(y1, y2) and barstate.isconfirmed and breakoutmode_otosupp
+            box.set_border_color(box, rescol_otosupp)
+            box.set_bgcolor(box, rescol_otosupp)
+        if close > math.max(y1, y2) and barstate.isconfirmed and breakoutmode_otosupp
+            box.set_border_color(box, supcol_otosupp)
+            box.set_bgcolor(box, supcol_otosupp)
+
+
+
+watermarki_supp = input.bool(true, "Watermark", group="Author Sign", confirm=true)
+
+string  i_tableYpos_oto_supp = input.string("top", "Position", inline = "12", options = ["top", "middle", "bottom"])
+string  i_tableXpos_oto_supp = input.string("center", "", inline = "12", options = ["left", "center", "right"])
+int     i_height_oto_supp    = input.int(5, "Height", minval = 1, maxval = 100, inline = "13")
+int     i_width_oto_supp     = input.int(50, "Width",  minval = 1, maxval = 100, inline = "13a")
+color   i_c_text_oto_supp    = input.color(color.new(color.white, 0), "", inline = "14")
+color   _bg_oto_supp    = input.color(color.new(color.blue, 70), "", inline = "14")
+string  i_textSize  = input.string("tiny", "Size", inline = "14", options = ["tiny", "small", "normal", "large", "huge", "auto"])
+i_text2_supp =  "ｂｙ　Mumei"
+i_text1_supp =  "When using the indicator" + "\n" + "thank you"
+var table watermark_supp = table.new(i_tableYpos_oto_supp + "_" + i_tableXpos_oto_supp, 1, 1)
+if barstate.islast and watermarki_supp
+    varip bool _changeText_supp = true
+    _changeText_supp := not _changeText_supp
+    string _txt_supp = _changeText_supp ? i_text2_supp : i_text1_supp
+    table.cell(watermark_supp, 0, 0, _txt_supp, i_width_oto_supp, i_height_oto_supp, i_c_text_oto_supp, text_size = i_textSize, bgcolor = _bg_oto_supp)
+
+//END OF AUTO SUPPORT AND RESISTANCE 
+//*******************************************************
+
+
+
 
 
 
