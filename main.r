@@ -650,7 +650,7 @@ if activate_oto_sr_strategy
 
 
 
-watermarki_supp = input.bool(true, "Watermark", group="Author Sign", confirm=true)
+watermarki_supp = input.bool(false, "Watermark", group="Author Sign", confirm=true)
 
 
 
@@ -673,3 +673,54 @@ if barstate.islast and watermarki_supp
 
 //END OF AUTO SUPPORT AND RESISTANCE 
 //*******************************************************
+
+
+// [pine]
+
+// !<------ User Inputs -----> 
+activate_consolidation_sr_strategy = input(title='Activate Consolidation range STRATEGY ?', defval=true)
+
+fill_trancparency_consold = 85
+
+
+if activate_consolidation_sr_strategy
+
+    fill_trancparency_consold = 100
+
+
+src_consold = input(close, title='Range Input (Default set to Close')
+lengthEMA_consold = input(19, title='Length')
+zoneToggle_consold = input(true, title='Toggle Zone Highlights')
+iCol_consold = color.new(#FFFFFF, 70)
+iCol_lowrange_consold = color.new(#e63946, 0)
+iCol_highrange_consold = color.new(#1d3557, 0)
+
+// !<---- Declarations & Calculations ---- > 
+trndUp_consold = float(na)
+trndDwn_consold = float(na)
+mid_consold = float(na)
+e_consold = ta.ema(src_consold, lengthEMA_consold)
+trndUp_consold := src_consold < nz(trndUp_consold[1]) and src_consold > trndDwn_consold[1] ? nz(trndUp_consold[1]) : high
+trndDwn_consold := src_consold < nz(trndUp_consold[1]) and src_consold > trndDwn_consold[1] ? nz(trndDwn_consold[1]) : low
+mid_consold := math.avg(trndUp_consold, trndDwn_consold)
+
+// !< ---- Plotting -----> 
+highRange_consold = plot( (trndUp_consold == nz(trndUp_consold[1]) ) and activate_consolidation_sr_strategy ? trndUp_consold : na, color=iCol_highrange_consold, linewidth=2, style=plot.style_linebr, title='Top of Period Range')
+lowRange_consold = plot( ( trndDwn_consold == nz(trndDwn_consold[1]) ) and activate_consolidation_sr_strategy ? trndDwn_consold : na, color=iCol_lowrange_consold, linewidth=2, style=plot.style_linebr, title='Bottom of Period Range')
+
+
+xzone_consold = plot( zoneToggle_consold ? src_consold > e_consold  ? trndDwn_consold : trndUp_consold : na, color=iCol_consold, style=plot.style_circles, linewidth=0, editable=false)
+
+
+
+
+
+
+fill(highRange_consold, xzone_consold, color=color.new(color.lime, fill_trancparency_consold))
+
+fill(xzone_consold, lowRange_consold, color=color.new(color.red, fill_trancparency_consold))
+
+//[/pine]
+
+
+//*********************************************************
